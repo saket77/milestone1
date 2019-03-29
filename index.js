@@ -4,7 +4,7 @@ const pathToRegexp = require('path-to-regexp');
 const app = express();
 
 app.use(bodyParser.json());
-app.use(cors.json());
+//app.use(cors.json());
 
 let items = [];
 let keys = [];
