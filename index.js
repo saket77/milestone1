@@ -1,10 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const pathToRegexp = require('path-to-regexp');
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cors.json());
 
 let items = [];
+let keys = [];
 
 app.get('/blabs', (req, res) => {
 
@@ -30,12 +33,15 @@ app.post('/blabs', (req, res) => {
     
 });
 app.delete('/blabs/:blabid', (req, res) => {
-	const id = req.id;
-
-	items = items.filter(function (item){
-		return items.id!==id;
+	const regexp = pathToRegexp('/blabs/:blabid', keys);
+	
+	const id = keys[0];
+    //console.log(`your server is running on port ${id}`);
+	items = items.filter(function (i){
+       
+		return i.id!==id;
 	});
-	res.status(200).send('blabs are fun');
+	res.status(200).send(`deleted blab has id ${id}`);
 
 });
 
