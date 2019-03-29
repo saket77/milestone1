@@ -1,0 +1,45 @@
+version: "3.5"
+services:
+  app:
+    build: .
+    command: npm run start
+    ports:
+      - target: 3000
+        published: 3000
+    volumes:
+      - type: volume
+        source: counter-vol
+        target: /code
+      - .:/app
+    restart: always
+    labels:
+            - "traefik.backend= app"
+            - "traefik.frontend.rule=Host:app.localhost;PathPrefixStrip:/api"
+            - "traefik.port=3000"
+            - "traefik.enable=true"
+
+
+    working_dir: /app
+
+  reverse-proxy:
+    image: traefik 
+    command: --api --docker
+    ports:
+      - "80:80"     
+      - "8080:8080" 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+       # So that Traefik can listen to the Docker events
+
+
+  client:
+    image: vtcs2304s19/blabber-client
+    labels:
+            - "traefik.backend= client"
+            - "traefik.frontend.rule=Host:app.localhost"
+            - "traefik.port=80"
+            - "traefik.enable=true"
+
+
+volumes:
+  counter-vol:
