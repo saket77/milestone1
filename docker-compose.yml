@@ -39,6 +39,15 @@ services:
             - "traefik.frontend.rule=Host:app.localhost"
             - "traefik.port=80"
             - "traefik.enable=true"
+  tests:
+    image: vtcs2304s19/blabber-api-tests
+    environment:
+      SERVICE_NAME: api
+      API_PORT: "3000" 
+  mongo:
+    image: mongo
+    volumes: 
+      -mongo-data:/data/db
 
 
 volumes:
