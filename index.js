@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const pathToRegexp = require('path-to-regexp');
 const app = express();
 const MongoClient = require('mongodb').MongoClient;
-const mongoUrl = 'mongodb://localhost:27017';
+const mongoUrl = 'mongodb://mongo:27017';
 let mongodb = null;
 
 app.use(bodyParser.json());
