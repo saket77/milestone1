@@ -86,23 +86,6 @@ services:
     volumes: 
       - mongo-data:/data/db
 
-  visualizer:
-    image: dockersamples/visualizer:stable
-    networks:
-      - webnet
-    labels:
-            - "traefik.backend= visualizer"
-            - "traefik.frontend.rule=Host:visualize.localhost"
-            - "traefik.port=8080"
-            - "traefik.enable=true"
-    ports:
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-    deploy:
-      placement:
-        constraints: [node.role == manager]
-
 volumes:
   mongo-data:
 networks:
