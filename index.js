@@ -19,9 +19,10 @@ app.get('/blabs', (req, res) => {
 	*/
 	let x = req.query.createdSince;
 		if (x==undefined) x=0;
+        console.log(`createdSince=${x}`);
 		mongoDb.collection('blabs')
         .find({
-        postTime: {$gte: x}
+        postTime: {$gte: parseInt(x)}
         }).toArray()
         .then(function(item) {
             res.status(200).send(item);
@@ -33,10 +34,13 @@ app.get('/blabs', (req, res) => {
 
 app.post('/blabs', (req, res) => {
     const newItem = {
-        name : req.body.author,
+        author:{
+            name : req.body.author.name,
+            email: req.body.author.email,
+        },
         message : req.body.message,
         postTime : Math.floor(Date.now()/1000),
-        id : items.length + 1,
+        id : Math.floor(Date.now()/1000),
     }
     //items.push(newItem);
     //res.status(201).send(newItem);
@@ -49,16 +53,17 @@ app.post('/blabs', (req, res) => {
 app.delete('/blabs/:blabid', (req, res) => {
 	//const regexp = pathToRegexp('/blabs/:blabid', keys);
 	
-	const id = req.params;
+	//const id = req.params;
     //console.log(`your server is running on port ${id}`);
 	/*items = items.filter(function (i){
        
 		return i.id!==parseInt(id.blabid);
 	});
 	*/
-	db.blabs.deleteOne({id: {$eq: id.blabid}});
+    //if (req.params.blabid===2) mongoDb.collection('blabs').remove( { } );
+	mongoDb.collection('blabs').deleteOne({ id: {$eq: parseInt(req.params.blabid)}});
 
-	res.status(200).send(`deleted blab has id ${id.blabid}`);
+	res.status(200).send(`deleted blab has id ${req.params.blabid}`);
 
 });
 MongoClient.connect(mongoUrl, function(err, client) {

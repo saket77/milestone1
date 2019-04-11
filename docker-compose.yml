@@ -7,9 +7,6 @@ services:
       - target: 3000
         published: 3000
     volumes:
-      - type: volume
-        source: counter-vol
-        target: /code
       - .:/app
     restart: always
     labels:
@@ -42,13 +39,13 @@ services:
   tests:
     image: vtcs2304s19/blabber-api-tests
     environment:
-      SERVICE_NAME: api
+      SERVICE_NAME: app
       API_PORT: "3000" 
   mongo:
     image: mongo
     volumes: 
-      -mongo-data:/data/db
-
+      - mongo-data:/data/db
 
 volumes:
-  counter-vol:
+  mongo-data:
+

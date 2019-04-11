@@ -1,0 +1,110 @@
+version: "3.5"
+services:
+  app:
+    image: saket7/cs2304_api
+    command: npm run start
+    ports:
+      - target: 3000
+        published: 3000
+    volumes:
+      - .:/app
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
+
+    labels:
+            - "traefik.backend= app"
+            - "traefik.frontend.rule=Host:app.localhost;PathPrefixStrip:/api"
+            - "traefik.port=3000"
+            - "traefik.enable=true"
+
+
+    working_dir: /app
+    networks:
+      - webnet 
+
+  reverse-proxy:
+    image: traefik 
+    command: --api --docker --docker.swarmMode
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]
+    ports:
+      - "80:80" 
+    networks:
+      - webnet    
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+       # So that Traefik can listen to the Docker events
+
+
+  client:
+    image: vtcs2304s19/blabber-client
+    networks:
+      - webnet
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
+    labels:
+            - "traefik.backend= client"
+            - "traefik.frontend.rule=Host:app.localhost"
+            - "traefik.port=80"
+            - "traefik.enable=true"
+  tests:
+    image: vtcs2304s19/blabber-api-tests
+    environment:
+      SERVICE_NAME: app
+      API_PORT: "3000" 
+    deploy:
+      replicas: 1
+      restart_policy: 
+        condition: on-failure
+      placement: 
+        constraints: [node.role == worker] 
+
+    networks:
+      - webnet
+  mongo:
+    image: mongo
+    networks:
+      - webnet
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]    
+    volumes: 
+      - mongo-data:/data/db
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    networks:
+      - webnet
+    labels:
+            - "traefik.backend= visualizer"
+            - "traefik.frontend.rule=Host:visualize.localhost"
+            - "traefik.port=8080"
+            - "traefik.enable=true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+volumes:
+  mongo-data:
+networks:
+  webnet:
+
