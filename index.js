@@ -6,6 +6,7 @@ const MongoClient = require('mongodb').MongoClient;
 const mongoUrl = 'mongodb://mongo:27017';
 let mongodb = null;
 
+let count =0;
 app.use(bodyParser.json());
 //app.use(cors.json());
 
@@ -40,7 +41,7 @@ app.post('/blabs', (req, res) => {
         },
         message : req.body.message,
         postTime : Math.floor(Date.now()/1000),
-        id : Math.floor(Date.now()/1000),
+        id : count++,
     }
     //items.push(newItem);
     //res.status(201).send(newItem);
