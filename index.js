@@ -5,9 +5,13 @@ const app = express();
 const MongoClient = require('mongodb').MongoClient;
 const mongoUrl = 'mongodb://mongo:27017';
 let mongodb = null;
+const prom = require('prom-client');
+const prom_gc = require('prometheus-gc-stats');
+prom_gc();
+process.env.MONGO_URL_FILE
 
-let count =0;
 app.use(bodyParser.json());
+let counter =0;
 //app.use(cors.json());
 
 app.get('/blabs', (req, res) => {
@@ -21,7 +25,7 @@ app.get('/blabs', (req, res) => {
 	let x = req.query.createdSince;
 		if (x==undefined) x=0;
         console.log(`createdSince=${x}`);
-		mongoDb.collection('blabs')
+		mongoDb.collection('blabs')  
         .find({
         postTime: {$gte: parseInt(x)}
         }).toArray()
@@ -33,6 +37,10 @@ app.get('/blabs', (req, res) => {
     //res.status(200).send(thing);
 });
 
+app.get('/metrics', function(req, res) {
+res.end(prom.register.metrics());
+});
+
 app.post('/blabs', (req, res) => {
     const newItem = {
         author:{
@@ -41,7 +49,7 @@ app.post('/blabs', (req, res) => {
         },
         message : req.body.message,
         postTime : Math.floor(Date.now()/1000),
-        id : count++,
+        id : counter++,
     }
     //items.push(newItem);
     //res.status(201).send(newItem);

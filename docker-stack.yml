@@ -3,11 +3,6 @@ services:
   app:
     image: saket7/cs2304_api
     command: npm run start
-    ports:
-      - target: 3000
-        published: 3000
-    volumes:
-      - .:/app
     deploy:
       replicas: 2
       restart_policy:
@@ -15,9 +10,9 @@ services:
       placement:
         constraints: [node.role == worker]
 
-    labels:
+      labels:
             - "traefik.backend= app"
-            - "traefik.frontend.rule=Host:app.localhost;PathPrefixStrip:/api"
+            - "traefik.frontend.rule=PathPrefixStrip:/api"
             - "traefik.port=3000"
             - "traefik.enable=true"
 
@@ -28,6 +23,7 @@ services:
 
   reverse-proxy:
     image: traefik 
+    read_only: true
     command: --api --docker --docker.swarmMode
     deploy:
       replicas: 1
@@ -37,6 +33,7 @@ services:
         constraints: [node.role == manager]
     ports:
       - "80:80" 
+      - "8080:8080"
     networks:
       - webnet    
     volumes:
@@ -54,9 +51,9 @@ services:
         condition: on-failure
       placement:
         constraints: [node.role == worker]
-    labels:
+      labels:
             - "traefik.backend= client"
-            - "traefik.frontend.rule=Host:app.localhost"
+            - "traefik.frontend.rule=/"
             - "traefik.port=80"
             - "traefik.enable=true"
   tests:
@@ -70,7 +67,6 @@ services:
         condition: on-failure
       placement: 
         constraints: [node.role == worker] 
-
     networks:
       - webnet
   mongo:
@@ -85,9 +81,15 @@ services:
         constraints: [node.role == worker]    
     volumes: 
       - mongo-data:/data/db
+    secrets:
+      -my_secret
 
 volumes:
   mongo-data:
 networks:
   webnet:
+secrets:
+  my_secret:
+    file: ./mysecret.txt
+
 
